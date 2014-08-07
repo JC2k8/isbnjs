@@ -1,84 +1,154 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
-<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<title>ISBN Parser - isbnjs sample</title>
-<style type="text/css">
-  div#title {
-    font-size: x-large;
-  }
-  input.value {
-    width: 150px;
-    background-color: #e0e0ff;
-  }
-</style>
-<script type="text/javascript" src="http://isbnjs.googlecode.com/svn/trunk/isbn.js"></script>
-<script type="text/javascript" src="http://isbnjs.googlecode.com/svn/trunk/isbn-groups.js"></script>
-<script type="text/javascript">
-<!-- <![CDATA[
-  function set(id, txt) {
-    document.getElementById(id).value = txt;
-  }
-  function parse() {
-    var txt = document.getElementById('isbn');
-    var isbn = ISBN.parse(txt.value);
-    if (isbn) {
-      set('result', 'good');
-      set('is_isbn_10', isbn.isIsbn10());
-      set('is_isbn_13', isbn.isIsbn13());
-      set('as_isbn_10', isbn.asIsbn10());
-      set('as_isbn_13', isbn.asIsbn13());
-      set('as_isbn_10_t', isbn.asIsbn10(true));
-      set('as_isbn_13_t', isbn.asIsbn13(true));
-      set('codes_groupname', isbn.codes.groupname);
-    } else {
-      set('result', 'bad');
+  <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+  <title>ISBN Parser - isbnjs sample</title>
+  <style type="text/css">
+    body { font-family: Helvetica,Verdana,sans-serif; margin: 0; }
+    #content {
+      background-color: #eee;
+      height: 238px;
+      left: 50%;
+      margin-left: -183px;
+      margin-top: -119px;
+      padding: 6px;
+      position: fixed;
+      top: 50%;
+      width: 360px;
     }
-  }
-// ]]> -->
-</script>
+    #title {
+      background-color: #ddd;
+      box-sizing: border-box;
+      font-size: x-large;
+      padding: 6px;
+      position: fixed;
+      text-align: right;
+      width: 100%;
+      z-index: 1;
+    }
+    input.value {
+      width: 200px;
+      background-color: #e0e0ff;
+    }
+    #tblResult { table-layout:fixed; width: 100%; }
+    #tblResult th { border-bottom: 1px dotted black; padding: 0 0 2px 0;}
+    #tblResult tr > td:last-of-type {text-align:right;}
+    .leftCol { width:40%; }
+    .rightCol { width:60%; }
+    #tblResult td { whitespace:nowrap; }
+  </style>
+  <script type="text/javascript" src="isbn.js"></script>
+  <script type="text/javascript" src="isbn-groups.js"></script>
+  <script type="text/javascript">
+    <!-- <![CDATA[
+    function set(id, txt) {
+      document.getElementById(id).value = txt;
+    }
+
+    function parseNormal() {
+      var isbn = document.getElementById("isbn");
+      parse(isbn.value);
+    }
+    
+    function parseAsNumber() {
+      var isbn = document.getElementById("isbn"),
+          nbr = ~~isbn.value;  // 0 if something's funky
+      parse(nbr);
+    }
+    
+    function parse(theIsbn) {
+        var isbn = ISBN.parse(theIsbn),
+            elems;
+        if (isbn) {
+          set('result', 'good');
+          set('is_isbn_10', isbn.isIsbn10());
+          set('is_isbn_13', isbn.isIsbn13());
+          set('as_isbn_10', isbn.asIsbn10());
+          set('as_isbn_13', isbn.asIsbn13());
+          set('as_isbn_10_t', isbn.asIsbn10(true));
+          set('as_isbn_13_t', isbn.asIsbn13(true));
+          set('codes_groupname', isbn.codes.groupname);
+        } else {
+          elems = document.getElementsByClassName("value");
+          Array.prototype.forEach.call(elems, function(el) {
+            el.value = el.id === "result" ? "bad" : "";
+          });
+        }
+      }
+      // ]]> -->
+  </script>
 </head>
+
 <body>
-<div id="title">ISBN Parser - isbnjs sample</div>
-<div>
-  ISBN:
-  <input id="isbn" type="text" value="9784873113685" />
-  <input id="parse" type="button" value="parse" onclick="parse()" />
-</div>
-<table>
-  <tr>
-    <td>result</td>
-    <td><input id="result" class="value" type="text" readonly="readonly" /></td>
-  </tr>
-  <tr>
-    <td>isIsbn10()</td>
-    <td><input id="is_isbn_10" class="value" type="text" readonly="readonly" /></td>
-  </tr>
-  <tr>
-    <td>isIsbn13()</td>
-    <td><input id="is_isbn_13" class="value" type="text" readonly="readonly" /></td>
-  </tr>
-  <tr>
-    <td>asIsbn10()</td>
-    <td><input id="as_isbn_10" class="value" type="text" readonly="readonly" /></td>
-  </tr>
-  <tr>
-    <td>asIsbn13()</td>
-    <td><input id="as_isbn_13" class="value" type="text" readonly="readonly" /></td>
-  </tr>
-  <tr>
-    <td>asIsbn10(true)</td>
-    <td><input id="as_isbn_10_t" class="value" type="text" readonly="readonly" /></td>
-  </tr>
-  <tr>
-    <td>asIsbn13(true)</td>
-    <td><input id="as_isbn_13_t" class="value" type="text" readonly="readonly" /></td>
-  </tr>
-  <tr>
-    <td>codes.groupname</td>
-    <td><input id="codes_groupname" class="value" type="text" readonly="readonly" /></td>
-  </tr>
-</table>
+  <div id="title">ISBN Parser - isbnjs sample</div>
+  <div id="content">
+    <table id="tblResult">
+      <colgroup>
+        <col class="leftCol" />
+        <col class="rightCol" />
+      </colgroup>
+      <tr>
+        <th colspan="2">
+          <label>
+            ISBN:
+            <input id="isbn" type="text" value="9784873113685" />
+            <input id="parse" type="button" value="parse" onclick="parseNormal()" />
+            <input id="parseAsNumber" type="button" value="parse as #" onclick="parseAsNumber()" />
+          </label>
+        </th>
+      </tr>
+      <tr>
+        <td>result</td>
+        <td>
+          <input id="result" class="value" type="text" readonly="readonly" />
+        </td>
+      </tr>
+      <tr>
+        <td>isIsbn10()</td>
+        <td>
+          <input id="is_isbn_10" class="value" type="text" readonly="readonly" />
+        </td>
+      </tr>
+      <tr>
+        <td>isIsbn13()</td>
+        <td>
+          <input id="is_isbn_13" class="value" type="text" readonly="readonly" />
+        </td>
+      </tr>
+      <tr>
+        <td>asIsbn10()</td>
+        <td>
+          <input id="as_isbn_10" class="value" type="text" readonly="readonly" />
+        </td>
+      </tr>
+      <tr>
+        <td>asIsbn13()</td>
+        <td>
+          <input id="as_isbn_13" class="value" type="text" readonly="readonly" />
+        </td>
+      </tr>
+      <tr>
+        <td>asIsbn10(true)</td>
+        <td>
+          <input id="as_isbn_10_t" class="value" type="text" readonly="readonly" />
+        </td>
+      </tr>
+      <tr>
+        <td>asIsbn13(true)</td>
+        <td>
+          <input id="as_isbn_13_t" class="value" type="text" readonly="readonly" />
+        </td>
+      </tr>
+      <tr>
+        <td>codes.groupname</td>
+        <td>
+          <input id="codes_groupname" class="value" type="text" readonly="readonly" />
+        </td>
+      </tr>
+    </table>
+  </div>
 </body>
+
 </html>
