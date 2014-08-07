@@ -8,11 +8,13 @@ var isbn10a = ISBN.parse('4873113369');
 var isbn10b = ISBN.parse('1933988037');
 var isbn13a = ISBN.parse('978-4-87311-336-4');
 var isbn13b = ISBN.parse('9781590597279');
+var isbnNbr = ISBN.parse(9781590597279);
 t.test([
   ['t', isbn10a],
   ['t', isbn10b],
   ['t', isbn13a],
-  ['t', isbn13b]
+  ['t', isbn13b],
+  ['t', isbnNbr]
 ]);
 t.test([
   //
@@ -57,5 +59,9 @@ t.test([
   ['eq', isbn13b.asIsbn10(), '1590597273'],
   ['eq', isbn13b.asIsbn10(true), '1-59059-727-3'],
   ['eq', isbn13b.asIsbn13(), '9781590597279'],
-  ['eq', isbn13b.asIsbn13(true), '978-1-59059-727-9']
+  ['eq', isbn13b.asIsbn13(true), '978-1-59059-727-9'],
+  // numbers
+  ['eq', isbnNbr.asIsbn13(), isbn13b.asIsbn13()],
+  ['eq', isbn13a.asIsbn10(), 4873113369],
+  ['eq', ISBN.hyphenate(9784873113364), '978-4-87311-336-4']
 ]);

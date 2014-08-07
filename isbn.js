@@ -8,7 +8,7 @@
 var ISBN;
 (function () {
 ISBN  = {
-  VERSION: '0.01',
+  VERSION: "0.01",
   GROUPS: {
     '0': {
       'name': 'English speaking area',
@@ -90,8 +90,9 @@ ISBN.isbn.prototype = {
 
   parse: function(val) {
     var ret;
-    // correct for misplaced hyphens
-    // val = val.replace(/ -/,'');
+
+    // also accept numbers (e.g. ISBNs without hyphens or X)
+    val += "";
     ret =
       val.match(/^\d{9}[\dX]$/) ?
         this.fill(
@@ -165,30 +166,30 @@ ISBN.isbn.prototype = {
       return null;
     }
 
-    prefix = codes.prefix ? codes.prefix : '978';
+    prefix = codes.prefix ? codes.prefix : "978";
     ck10 = this.calcCheckDigit([
-      codes.group, codes.publisher, codes.article].join(''));
+      codes.group, codes.publisher, codes.article].join(""));
     if (!ck10) {
       return null;
     }
 
-    ck13 = this.calcCheckDigit([prefix, codes.group, codes.publisher, codes.article].join(''));
+    ck13 = this.calcCheckDigit([prefix, codes.group, codes.publisher, codes.article].join(""));
     if (!ck13) {
       return null;
     }
 
     parts13 = [prefix, codes.group, codes.publisher, codes.article, ck13];
     this.merge(codes, {
-      isbn13: parts13.join(''),
-      isbn13h: parts13.join('-'),
+      isbn13: parts13.join(""),
+      isbn13h: parts13.join("-"),
       check10: ck10,
       check13: ck13,
       groupname: rec.name
     });
 
-    if (prefix === '978') {
+    if (prefix === "978") {
       parts10 = [codes.group, codes.publisher, codes.article, ck10];
-      this.merge(codes, {isbn10: parts10.join(''), isbn10h: parts10.join('-')});
+      this.merge(codes, {isbn10: parts10.join(""), isbn10h: parts10.join("-")});
     }
 
     return codes;
@@ -197,7 +198,7 @@ ISBN.isbn.prototype = {
   getGroupRecord: function(isbn10) {
     var key;
     for (key in this.groups) {
-      if (isbn10.match('^' + key + '(.+)')) {
+      if (isbn10.match("^" + key + "(.+)")) {
         return {group: key, record: this.groups[key], rest: RegExp.$1};
       }
     }
@@ -212,7 +213,7 @@ ISBN.isbn.prototype = {
         c += (10 - n) * isbn.charAt(n);
       }
       c = (11 - c % 11) % 11;
-      return c === 10 ? 'X' : String(c);
+      return c === 10 ? "X" : String(c);
 
     } else if (isbn.match(/(?:978|979)\d{9}[\dX]?/)) {
       c = 0;
