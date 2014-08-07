@@ -11,7 +11,7 @@ Test.Tiny.prototype = {
   _initialize: function() {
     this._print =
       typeof GM_log == 'function'? GM_log:
-      typeof console == 'object'? console.log:
+      typeof console == 'object'? Function.prototype.bind.call(console.log, console):
       typeof WScript == 'object'?
         function(msg) { WScript.Echo(msg) }:
       typeof window == 'object'?
