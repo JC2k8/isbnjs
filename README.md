@@ -3,7 +3,11 @@ isbnjs
 
 An ISBN javascript library. Forked from http://isbnjs.googlecode.com/ to fix some things and update others.
 
-### Sample Codes
+#### Sample Sites
+
+[ISBN Parser Demo](http://JC2k8.github.com/isbnjs/)
+
+#### Sample Codes
 
 ```javascript
 var isbn10a = ISBN.parse('4873113369');
