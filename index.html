@@ -1,153 +1,393 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-
+<!DOCTYPE html>
+<html>
 <head>
   <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
   <title>ISBN Parser - isbnjs sample</title>
+  <link href="http://fonts.googleapis.com/css?family=Source+Sans Pro:400,700" rel="stylesheet" type="text/css">
   <style type="text/css">
-    body { font-family: Helvetica,Verdana,sans-serif; margin: 0; }
+    body {
+      background-color: #FCFCFC;
+      font: normal 100%/1.2 "Source Sans Pro",Helvetica,Verdana,Arial,sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    #container {
+      padding-top:20px;
+      height:100%;
+    }
     #content {
-      background-color: #eee;
-      height: 238px;
-      left: 50%;
-      margin-left: -183px;
-      margin-top: -119px;
-      padding: 6px;
-      position: fixed;
-      top: 50%;
-      width: 360px;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box;
+      padding: 6px 12px;
+      width: 680px;
+    }
+    #header {
+      -moz-box-sizing: border-box;
+      box-shadow:0px 3px 6px rgba(0,0,0,.5);
+      box-sizing: border-box;
+      min-width: 515px;
+      padding: 0;
+      top: 0;
+      left: 0;
+      width: 100%;
     }
     #title {
-      background-color: #ddd;
       box-sizing: border-box;
-      font-size: x-large;
-      padding: 6px;
-      position: fixed;
-      text-align: right;
+      font-size: 1.5em;
+      padding: 6px 12px;
+      position: relative;
+    }
+    #menu {
+      background-color: #B2C9B0;
+      border-bottom: 1px solid #AAAAAA;
+      padding: 3px 12px;
       width: 100%;
-      z-index: 1;
     }
-    input.value {
-      width: 200px;
+    #menu ul { margin: 0; padding: 0; }
+    #menu li { display: inline; }
+    #menu li:not(:first-of-type) { padding: 0 6px; }
+    a {
+      color: #84cae8;
+      text-decoration: none;
+    }
+    .value {
+      width: 100%;
       background-color: #e0e0ff;
+      box-sizing: border-box;
     }
-    #tblResult { table-layout:fixed; width: 100%; }
-    #tblResult th { border-bottom: 1px dotted black; padding: 0 0 2px 0;}
-    #tblResult tr > td:last-of-type {text-align:right;}
-    .leftCol { width:40%; }
-    .rightCol { width:60%; }
-    #tblResult td { whitespace:nowrap; }
+    #isbn { margin-right: 10px; width: 10em; }
+
+    /* table related */
+    #tblResult {
+      border-collapse: collapse;
+      font-size: .9em;
+      table-layout: fixed;
+      width: 100%;
+    }
+    #tblResult td { padding: 2px; }
+    #tblResult th { padding: 4px; }
+    #tblResult th label { font-weight: normal; }
+    #tblResult th input[type="checkbox"] {
+      margin: 0 3px 0 5px;
+      vertical-align: middle;
+    }
+    #tblResult tr > td:nth-of-type(3) { padding-left:5px;}
+    #tblResult .subheader td {
+      border-color: #999;
+      border-style: solid none;
+      border-width: 1px 0;
+      font-weight: bold;
+      padding: 6px;
+      text-align: center !important;
+    }
+
+    td#tdMsg {
+      color: #ff0000;
+      padding: 10px 5px;
+      text-align: center;
+    }
+    td.empty:after {
+      content: "empty cell";
+      visibility: hidden;
+    }
+    .leftCol { width:20%; }
+    .rightCol { width:20%; }
+    colgroup:last-of-type .rightCol { width: 40%;}
+    #tblResult tr td:not([colspan]):nth-of-type(odd) { padding-right: 5px; text-align:right; }
+    #tblResult tr td:not([colspan]):nth-of-type(even) { text-align:left; }
+
+    /* header related */
+    .right { 
+      bottom: 6px;
+      position: absolute;
+      right: 12px;
+    }
+    .small { 
+      font-size: 0.5em;
+      height: 1em;
+      line-height: 0.5em;
+    }
+    .center { margin: 0 auto; }
+    select { padding: 1px 0;}
+    optgroup {
+      background-color: #555555;
+      color: #FCFCFC;
+      font-style: normal;
+    }
+    option {
+      background-color: #ffffff;
+      color: #000000;
+    }
+    .darkBackground {
+      background-color: #555555;
+      color: #FCFCFC;
+    }
+    .bold { font-weight:bold; }
+    .hidden { display:none; }
   </style>
   <script type="text/javascript" src="isbn.js"></script>
   <script type="text/javascript" src="isbn-groups.js"></script>
   <script type="text/javascript">
-    <!-- <![CDATA[
-    function set(id, txt) {
-      document.getElementById(id).value = txt;
+    function set(id, val) { document.getElementById(id).value = val === undefined ? "" : val; }
+
+    function showMsg(msg, isHtml) {
+      var elm = document.getElementById("tdMsg");
+      if (isHtml) {
+        elm.innerHTML = msg === false ? "" : msg;
+      } else {
+        elm.textContent = msg === false ? "" : msg;
+      }
+      elm.className = msg === false ? "empty" : "";
     }
 
-    function parseNormal() {
-      var isbn = document.getElementById("isbn");
-      parse(isbn.value);
-    }
-    
-    function parseAsNumber() {
-      var isbn = document.getElementById("isbn"),
-          nbr = ~~isbn.value;  // 0 if something's funky
-      parse(nbr);
-    }
-    
-    function parse(theIsbn) {
-        var isbn = ISBN.parse(theIsbn),
-            elems;
-        if (isbn) {
-          set('result', 'good');
-          set('is_isbn_10', isbn.isIsbn10());
-          set('is_isbn_13', isbn.isIsbn13());
-          set('as_isbn_10', isbn.asIsbn10());
-          set('as_isbn_13', isbn.asIsbn13());
-          set('as_isbn_10_t', isbn.asIsbn10(true));
-          set('as_isbn_13_t', isbn.asIsbn13(true));
-          set('codes_groupname', isbn.codes.groupname);
-        } else {
-          elems = document.getElementsByClassName("value");
-          Array.prototype.forEach.call(elems, function(el) {
-            el.value = el.id === "result" ? "bad" : "";
-          });
+    function parse() {
+      var parseNbr = document.getElementById("parseAsNumber"),
+          isbn = document.getElementById("isbn").value,
+          elems,
+          nbr;
+      showMsg(false);
+      if (parseNbr && parseNbr.checked) {
+        // let's try to parse the input as a number
+        nbr = +isbn;
+        if (nbr !== nbr) {
+          // NaN, something went wrong
+          showMsg("Couldn't parse as a number - trying to parse as string");
         }
       }
-      // ]]> -->
+      isbn = ISBN.parse(isbn);
+      if (isbn) {
+        set("result", "good");
+        set("is-isbn-10", isbn.isIsbn10());
+        set("is-isbn-13", isbn.isIsbn13());
+        set("as-isbn-10", isbn.asIsbn10());
+        set("as-isbn-13", isbn.asIsbn13());
+        set("as-isbn-10-t", isbn.asIsbn10(true));
+        set("as-isbn-13-t", isbn.asIsbn13(true));
+        set("codes-groupname", isbn.codes.groupname);
+        set("codes-prefix", isbn.codes.prefix);
+        set("codes-group", isbn.codes.group);
+        set("codes-publisher", isbn.codes.publisher);
+        set("codes-article", isbn.codes.article);
+        set("codes-check", isbn.codes.check);
+        set("codes-check10", isbn.codes.check10);
+        set("codes-check13", isbn.codes.check13);
+        set("source", isbn.codes.source);
+      } else {
+        elems = document.getElementsByClassName("value");
+        Array.prototype.forEach.call(elems, function(el) {
+          el.value = el.id === "result" ? "bad" : "";
+        });
+      }
+    }
+
+    function setValue() {
+      var elm = document.getElementById("isbn");
+      elm.value = this.value;
+      checkZero.apply(elm);
+    }
+
+    function checkZero() {
+      var force = document.getElementById("parseAsNumber"),
+          el = document.getElementById("isbn"),
+          val = el.value;
+      if (val[0] === "0" && force.checked) {
+        showMsg("Since this ISBN <strong>begins with a zero</strong> passing it to the parser as a number will not work.", true);
+      } else {
+        showMsg(false);
+      }
+    }
+
+    function getEnter(e) {
+      if (e.keyCode === 13) {
+        document.getElementById("parse").click();
+      }
+    }
+
+    function addEvent(elmId, evt, func) {
+      var elm = document.getElementById(elmId);
+      if (elm) {
+        elm.addEventListener(evt, func, false);
+      }
+    }
+
+    (function () {
+      // add events
+      document.addEventListener("DOMContentLoaded", function listener() {
+        document.removeEventListener("DOMContentLoaded", listener);
+        /* input should do for all modern browsers */
+        addEvent("isbn", "input", checkZero);
+        addEvent("isbn", "keydown", getEnter);
+        addEvent("testIsbns", "change", setValue);
+        addEvent("parseAsNumber", "click", checkZero);
+        addEvent("parse", "click", parse);
+      }, false);
+    }());
   </script>
 </head>
 
 <body>
-  <div id="title">ISBN Parser - isbnjs sample</div>
-  <div id="content">
-    <table id="tblResult">
-      <colgroup>
-        <col class="leftCol" />
-        <col class="rightCol" />
-      </colgroup>
-      <tr>
-        <th colspan="2">
-          <label>
-            ISBN:
-            <input id="isbn" type="text" value="9784873113685" />
-            <input id="parse" type="button" value="parse" onclick="parseNormal()" />
-            <input id="parseAsNumber" type="button" value="parse as #" onclick="parseAsNumber()" />
-          </label>
-        </th>
-      </tr>
-      <tr>
-        <td>result</td>
-        <td>
-          <input id="result" class="value" type="text" readonly="readonly" />
-        </td>
-      </tr>
-      <tr>
-        <td>isIsbn10()</td>
-        <td>
-          <input id="is_isbn_10" class="value" type="text" readonly="readonly" />
-        </td>
-      </tr>
-      <tr>
-        <td>isIsbn13()</td>
-        <td>
-          <input id="is_isbn_13" class="value" type="text" readonly="readonly" />
-        </td>
-      </tr>
-      <tr>
-        <td>asIsbn10()</td>
-        <td>
-          <input id="as_isbn_10" class="value" type="text" readonly="readonly" />
-        </td>
-      </tr>
-      <tr>
-        <td>asIsbn13()</td>
-        <td>
-          <input id="as_isbn_13" class="value" type="text" readonly="readonly" />
-        </td>
-      </tr>
-      <tr>
-        <td>asIsbn10(true)</td>
-        <td>
-          <input id="as_isbn_10_t" class="value" type="text" readonly="readonly" />
-        </td>
-      </tr>
-      <tr>
-        <td>asIsbn13(true)</td>
-        <td>
-          <input id="as_isbn_13_t" class="value" type="text" readonly="readonly" />
-        </td>
-      </tr>
-      <tr>
-        <td>codes.groupname</td>
-        <td>
-          <input id="codes_groupname" class="value" type="text" readonly="readonly" />
-        </td>
-      </tr>
-    </table>
+  <div id="header">
+    <div id="title" class="darkBackground">
+      <span class="bold">ISBN Parser - isbnjs sample</span>
+      <span class="small right"><a href="https://github.com/JC2k8/isbnjs/">https://github.com/JC2k8/isbnjs/</a></span>
+    </div>
+    <div id="menu">
+      <ul>
+        <li>insert ISBN:</li>
+        <li>
+          <select name="testIsbns" id="testIsbns">
+            <option selected="selected" disabled="disabled">[Select a value]</option>
+            <optgroup label="valid ISBNs w/ hyphens">
+              <option value="0-345-42145-0">English ISBN-10</option>
+              <option value="978-0-345-45589-5">English ISBN-13</option>
+              <option value="3-257-22800-7">German ISBN-10</option>
+              <option value="978-3-257-22953-0">German ISBN-13</option>
+              <option value="2-07-061275-9">French ISBN-10</option>
+              <option value="978-2-266-22237-2">French ISBN-13</option>
+              <option value="4-8009-1042-0">Japanese ISBN-10</option>
+              <option value="978-4-06-219095-4">Japanese ISBN-13</option>
+            </optgroup>
+            <optgroup label="valid ISBNs w/o hyphens">
+              <option value="0345421450">English ISBN-10</option>
+              <option value="9780345455895">English ISBN-13</option>
+              <option value="3257228007">German ISBN-10</option>
+              <option value="9783257229530">German ISBN-13</option>
+              <option value="2070612759">French ISBN-10</option>
+              <option value="9782266222372">French ISBN-13</option>
+              <option value="4800910420">Japanese ISBN-10</option>
+              <option value="9784062190954">Japanese ISBN-13</option>
+            </optgroup>
+            <optgroup label="invalid inputs">
+              <option value="foobar">plain text</option>
+              <option value="1387956346">10 digits (no ISBN)</option>
+              <option value="6461638743496">13 digits (no ISBN)</option>
+              <option value="978-0345455871">Amazon pseudo ISBN-13</option>
+              <option value="0-3-4-5421450">valid ISBN-10 (wrong hyphens)</option>
+              <option value="978-2-2-662223-72">valid ISBN-13 (wrong hyphens)</option>
+              <option value="42 is the answer">text and numbers</option>
+            </optgroup>
+          </select>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div id="container">
+    <div id="content" class="center">
+      <table id="tblResult">
+        <colgroup span="2">
+          <col class="leftCol" />
+          <col class="rightCol" />
+        </colgroup>
+        <colgroup span="2">
+          <col class="leftCol" />
+          <col class="rightCol" />
+        </colgroup>
+        <tr>
+          <th colspan="4">
+            <label>
+              ISBN:
+              <input id="isbn" type="text" />
+            </label>
+            <input id="parse" type="button" value="parse" />
+            <label><input id="parseAsNumber" type="checkbox" value="parse as number" /> parse as number</label>
+          </th>
+        </tr>
+        <tr>
+          <td id="tdMsg" class="empty" colspan="4"></td>
+        </tr>
+        <tr class="subheader">
+          <td colspan="2">results</td>
+          <td colspan="2">codes</td>
+        </tr>
+        <tr>
+          <td>result</td>
+          <td>
+            <input id="result" class="value" type="text" readonly="readonly" />
+          </td>
+          <td>groupname</td>
+          <td>
+            <input id="codes-groupname" class="value" type="text" readonly="readonly" />
+          </td>
+        </tr>
+        <tr>
+          <td>isIsbn10()</td>
+          <td>
+            <input id="is-isbn-10" class="value" type="text" readonly="readonly" />
+          </td>
+          <td>prefix</td>
+          <td>
+            <input id="codes-prefix" class="value" type="text" readonly="readonly" />
+          </td>
+        </tr>
+        <tr>
+          <td>isIsbn13()</td>
+          <td>
+            <input id="is-isbn-13" class="value" type="text" readonly="readonly" />
+          </td>
+          <td>group</td>
+          <td>
+            <input id="codes-group" class="value" type="text" readonly="readonly" />
+          </td>
+        </tr>
+        <tr>
+          <td>asIsbn10()</td>
+          <td>
+            <input id="as-isbn-10" class="value" type="text" readonly="readonly" />
+          </td>
+          <td>publisher</td>
+          <td>
+            <input id="codes-publisher" class="value" type="text" readonly="readonly" />
+          </td>
+        </tr>
+        <tr>
+          <td>asIsbn13()</td>
+          <td>
+            <input id="as-isbn-13" class="value" type="text" readonly="readonly" />
+          </td>
+          <td>article</td>
+          <td>
+            <input id="codes-article" class="value" type="text" readonly="readonly" />
+          </td>
+        </tr>
+        <tr>
+          <td>asIsbn10(true)</td>
+          <td>
+            <input id="as-isbn-10-t" class="value" type="text" readonly="readonly" />
+          </td>
+          <td>check</td>
+          <td>
+            <input id="codes-check" class="value" type="text" readonly="readonly" />
+          </td>
+        </tr>
+        <tr>
+          <td>asIsbn13(true)</td>
+          <td>
+            <input id="as-isbn-13-t" class="value" type="text" readonly="readonly" />
+          </td>
+          <td>check10</td>
+          <td>
+            <input id="codes-check10" class="value" type="text" readonly="readonly" />
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>check13</td>
+          <td>
+            <input id="codes-check13" class="value" type="text" readonly="readonly" />
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>source</td>
+          <td>
+            <input id="source" class="value" type="text" readonly="readonly" />
+          </td>
+        </tr>
+      </table>
+    </div>
   </div>
 </body>
 
